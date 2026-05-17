@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>裁剪测试</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #1a1a2e;
+            color: white;
+            font-family: sans-serif;
+        }
+        
+        .cropper-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .cropper-modal.active {
+            display: flex;
+        }
+        
+        .cropper-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+        }
+        
+        .cropper-container {
+            position: relative;
+            background: #16213e;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 90vh;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+        
+        .cropper-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid #333;
+        }
+        
+        .cropper-header h3 {
+            margin: 0;
+        }
+        
+        .cropper-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #888;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .cropper-body {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .cropper-canvas-container {
+            position: relative;
+            border: 2px solid #333;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #0a0a0a;
+        }
+        
+        #cropper-canvas {
+            display: block;
+        }
+        
+        .cropper-crop-circle {
+            position: absolute;
+            border: 3px solid #ff6b6b;
+            border-radius: 50%;
+            cursor: move;
+            box-shadow: 0 0 20px rgba(255, 107, 107, 0.5);
+            background: rgba(255, 107, 107, 0.1);
+            z-index: 10;
+            display: block;
+        }
+        
+        .cropper-hint {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            color: #fff;
+        }
+        
+        .cropper-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        #size-slider {
+            flex: 1;
+            height: 6px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #333;
+            border-radius: 3px;
+        }
+        
+        #size-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #ff6b6b;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        
+        .cropper-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            padding: 20px 24px;
+            border-top: 1px solid #333;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .btn-primary {
+            background: #ff6b6b;
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: #333;
+            color: white;
+        }
+        
+        #upload-btn {
+            padding: 15px 30px;
+            font-size: 16px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        
+        #result-preview {
+            margin-top: 20px;
+            max-width: 200px;
+            border-radius: 50%;
+            border: 3px solid #ff6b6b;
+        }
+    </style>
+</head>
+<body>
+    <h1>头像裁剪测试</h1>
+    <button id="upload-btn">上传图片</button>
+    <input type="file" id="file-input" accept="image/*" style="display: none;">
+    
+    <div id="result-container" style="display: none;">
+        <h3>裁剪结果：</h3>
+        <img id="result-preview" src="" alt="裁剪结果">
+    </div>
+    
+    <div class="cropper-modal" id="cropper-modal">
+        <div class="cropper-overlay" id="cropper-overlay"></div>
+        <div class="cropper-container">
+            <div class="cropper-header">
+                <h3>裁剪头像</h3>
+                <button class="cropper-close" id="cropper-close">&times;</button>
+            </div>
+            <div class="cropper-body">
+                <div class="cropper-canvas-container" id="cropper-canvas-container">
+                    <canvas id="cropper-canvas"></canvas>
+                    <div class="cropper-crop-circle" id="cropper-crop-circle"></div>
+                    <div class="cropper-hint">拖动裁剪框调整位置，滚轮调整大小</div>
+                </div>
+                <div class="cropper-controls">
+                    <span>大小: </span>
+                    <input type="range" id="size-slider" min="50" max="300" value="200" step="10">
+                    <span id="size-display">200</span>px
+                </div>
+            </div>
+            <div class="cropper-footer">
+                <button class="btn btn-secondary" id="cropper-cancel">取消</button>
+                <button class="btn btn-primary" id="cropper-confirm">确认裁剪</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import ImageCropper from './js/modules/ImageCropper.js';
+        
+        const uploadBtn = document.getElementById('upload-btn');
+        const fileInput = document.getElementById('file-input');
+        const resultContainer = document.getElementById('result-container');
+        const resultPreview = document.getElementById('result-preview');
+        
+        const cropper = new ImageCropper({
+            onComplete: function(croppedData) {
+                resultPreview.src = croppedData;
+                resultContainer.style.display = 'block';
+            }
+        });
+        
+        uploadBtn.addEventListener('click', function() {
+            fileInput.click();
+        });
+        
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    cropper.open(event.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+            fileInput.value = '';
+        });
+    </script>
+</body>
+</html>

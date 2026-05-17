@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>番茄钟 - 专注学习助手</title>
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/layout/header.css">
+    <link rel="stylesheet" href="css/layout/card.css">
+    <link rel="stylesheet" href="css/components/button.css">
+    <link rel="stylesheet" href="css/components/input.css">
+    <link rel="stylesheet" href="css/components/modal.css">
+    <link rel="stylesheet" href="css/components/cropper.css?v=2026042602">
+    <link rel="stylesheet" href="css/pages/timer.css">
+    <link rel="stylesheet" href="css/pages/todo.css">
+    <link rel="stylesheet" href="css/pages/stats.css">
+    <link rel="stylesheet" href="css/pages/profile.css">
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <h1 class="logo">🍅 番茄钟</h1>
+            <nav class="nav">
+                <button class="nav-btn active" data-tab="timer">专注</button>
+                <button class="nav-btn" data-tab="profile">个人中心</button>
+            </nav>
+            <div class="auth-menu" id="user-menu">
+                <button class="auth-btn" id="btn-login">🔐 登录</button>
+                <button class="auth-btn" id="btn-register">📝 注册</button>
+                <div class="user-info" id="user-info" style="display: none;">
+                    <span>👤 用户</span>
+                    <button class="auth-btn" id="btn-logout">🚪 退出</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <section id="timer" class="tab-content active">
+            <div class="timer-container">
+                <div class="timer-card">
+                    <div class="timer-display">
+                        <span class="timer-time" id="timer-time">25:00</span>
+                        <span class="timer-label" id="timer-label">专注时间</span>
+                        <div class="timer-meta">
+                            <span id="timer-sessions">第 0 个番茄</span>
+                            <span id="timer-mode">专注模式</span>
+                        </div>
+                    </div>
+                    
+                    <div class="timer-controls">
+                        <button class="btn btn-secondary" id="btn-settings">⚙️ 设置</button>
+                        <button class="btn btn-primary" id="btn-start">▶️ 开始</button>
+                        <button class="btn btn-danger" id="btn-reset">⏹️ 重置</button>
+                    </div>
+                    
+                    <div class="timer-progress">
+                        <div class="progress-bar" id="progress-bar"></div>
+                    </div>
+                    
+                    <div class="timer-extra">
+                        <div class="timer-extra-card">
+                            <div class="timer-extra-icon">🍅</div>
+                            <div class="timer-extra-title">今日完成</div>
+                            <div class="timer-extra-value" id="today-sessions">0</div>
+                        </div>
+                        <div class="timer-extra-card">
+                            <div class="timer-extra-icon">⏱️</div>
+                            <div class="timer-extra-title">今日学习</div>
+                            <div class="timer-extra-value" id="today-minutes">0</div>
+                        </div>
+                        <div class="timer-extra-card">
+                            <div class="timer-extra-icon">🔥</div>
+                            <div class="timer-extra-title">连续打卡</div>
+                            <div class="timer-extra-value" id="streak-days">0</div>
+                        </div>
+                    </div>
+                    
+                    <div class="timer-actions">
+                        <button class="timer-action-btn" id="btn-add-task">📝 添加任务</button>
+                        <button class="timer-action-btn" id="btn-skip-break">⏭️ 跳过休息</button>
+                        <button class="timer-action-btn" id="btn-go-profile">� 个人中心</button>
+                    </div>
+                    
+                    <div class="timer-task-section" id="timer-task-section">
+                        <div class="placeholder-icon">📋</div>
+                        <div class="placeholder">当前未关联任务<br/>点击上方「关联任务」按钮添加</div>
+                    </div>
+                    
+                    <div class="timer-task-card" id="timer-task-card" style="display: none;">
+                        <div class="task-card-header">
+                            <span class="task-card-title" id="task-card-title"></span>
+                            <button class="task-card-remove" id="btn-remove-task">✕</button>
+                        </div>
+                        <div class="task-card-info">
+                            <span class="task-card-date" id="task-card-date"></span>
+                            <span class="task-card-progress" id="task-card-progress"></span>
+                        </div>
+                        <div class="task-card-description" id="task-card-description"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+
+        <section id="profile" class="tab-content">
+            <div class="profile-container">
+                <div class="profile-card">
+                    <div class="profile-info">
+                        <div class="avatar-wrapper">
+                            <img id="profile-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=user" alt="头像">
+                            <label class="avatar-upload-btn" for="avatar-upload">
+                                <span>📷</span>
+                            </label>
+                            <input type="file" id="avatar-upload" accept="image/*" style="display: none;">
+                        </div>
+                        
+                        <div class="user-info">
+                            <h2 id="profile-username">用户名</h2>
+                            <p id="profile-nickname-display">昵称</p>
+                        </div>
+                        <div class="signature-container">
+                            <p id="profile-signature-display" class="signature">分享你的个性签名...</p>
+                        </div>
+                        
+                        <div class="profile-actions">
+                            <button class="btn btn-secondary" id="btn-edit-profile">编辑资料</button>
+                            <button class="btn btn-secondary" id="btn-change-avatar">更换头像</button>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-details">
+                        <div class="detail-item">
+                            <span class="detail-label">年龄</span>
+                            <span id="profile-age-display">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">性别</span>
+                            <span id="profile-gender-display">-</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">所在地</span>
+                            <span id="profile-location-display">-</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="stats-section">
+                    <h3>📊 学习统计</h3>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value" id="profile-today-minutes">0</div>
+                            <div class="stat-label">今日学习(分钟)</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="profile-week-minutes">0</div>
+                            <div class="stat-label">本周学习(分钟)</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="profile-completed-sessions">0</div>
+                            <div class="stat-label">完成番茄数</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value" id="profile-streak-days">0</div>
+                            <div class="stat-label">连续打卡(天)</div>
+                        </div>
+                    </div>
+                    
+                    <div class="daily-chart-section">
+                        <h4>每日学习记录</h4>
+                        <div id="profile-daily-chart" class="daily-chart"></div>
+                    </div>
+                </div>
+                
+                <div class="tasks-section">
+                    <div class="section-header">
+                        <h3>✅ 我的待办</h3>
+                        <button class="btn btn-primary btn-sm" id="btn-add-todo-from-profile">+ 添加任务</button>
+                    </div>
+                    <div id="profile-todo-list" class="todo-list">
+                        <div class="empty-state">
+                            <p>📝 暂无待办任务</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div class="modal" id="settings-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>计时器设置</h3>
+                <button class="modal-close" id="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>专注时长(分钟)</label>
+                    <input type="number" id="focus-duration" value="25" min="1" max="120">
+                </div>
+                <div class="form-group">
+                    <label>休息时长(分钟)</label>
+                    <input type="number" id="break-duration" value="5" min="1" max="60">
+                </div>
+                <div class="form-group">
+                    <label>长休息时长(分钟)</label>
+                    <input type="number" id="long-break-duration" value="15" min="1" max="120">
+                </div>
+                <div class="form-group">
+                    <label>长休息间隔(番茄数)</label>
+                    <input type="number" id="long-break-interval" value="4" min="1" max="10">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="btn-cancel">取消</button>
+                <button class="btn btn-primary" id="btn-save">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="edit-profile-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>编辑资料</h3>
+                <button class="modal-close" id="edit-profile-modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form class="profile-form" id="edit-profile-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>昵称</label>
+                            <input type="text" id="edit-profile-nickname" placeholder="请输入昵称">
+                        </div>
+                        <div class="form-group">
+                            <label>年龄</label>
+                            <input type="number" id="edit-profile-age" min="1" max="150" placeholder="年龄">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>性别</label>
+                        <div class="gender-options">
+                            <label class="gender-option">
+                                <input type="radio" name="edit-gender" value="female">
+                                <span>👩 女</span>
+                            </label>
+                            <label class="gender-option">
+                                <input type="radio" name="edit-gender" value="male">
+                                <span>👨 男</span>
+                            </label>
+                            <label class="gender-option">
+                                <input type="radio" name="edit-gender" value="other">
+                                <span>⚧️ 其他</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="location-row">
+                        <div class="form-group">
+                            <label>省份</label>
+                            <select id="edit-profile-province">
+                                <option value="">请选择省份</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>城市</label>
+                            <select id="edit-profile-city">
+                                <option value="">请选择城市</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>区县</label>
+                            <select id="edit-profile-district">
+                                <option value="">请选择区县</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>个人签名</label>
+                        <textarea id="edit-profile-signature" rows="3" placeholder="分享你的个性签名..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="btn-cancel-edit">取消</button>
+                <button class="btn btn-primary" id="btn-save-edit">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="todo-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="todo-modal-title">添加待办</h3>
+                <button class="modal-close" id="todo-modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>标题</label>
+                    <input type="text" id="todo-title" placeholder="输入待办事项">
+                </div>
+                <div class="form-group">
+                    <label>描述</label>
+                    <textarea id="todo-description" placeholder="添加描述（可选）"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>截止日期</label>
+                    <input type="date" id="todo-due-date">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="btn-todo-cancel">取消</button>
+                <button class="btn btn-primary" id="btn-todo-save">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="auth-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="auth-modal-title">登录</h3>
+                <button class="modal-close" id="auth-modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>用户名</label>
+                    <input type="text" id="auth-username" placeholder="输入用户名">
+                    <div class="field-hint" id="username-hint"></div>
+                </div>
+                <div class="form-group">
+                    <label>密码</label>
+                    <input type="password" id="auth-password" placeholder="输入密码">
+                    <div class="password-strength" id="password-strength" style="display: none;">
+                        <div class="strength-bar">
+                            <div class="strength-bar-fill" id="strength-bar-fill"></div>
+                        </div>
+                        <div class="strength-requirements">
+                            <div class="requirement" id="req-length">
+                                <span class="req-icon">✗</span>
+                                <span>至少8个字符</span>
+                            </div>
+                            <div class="requirement" id="req-letters">
+                                <span class="req-icon">✗</span>
+                                <span>包含大小写字母</span>
+                            </div>
+                            <div class="requirement" id="req-number">
+                                <span class="req-icon">✗</span>
+                                <span>包含数字</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group" id="auth-password-confirm" style="display: none;">
+                    <label>确认密码</label>
+                    <input type="password" id="auth-password-confirm-input" placeholder="再次输入密码">
+                </div>
+                <div class="form-group" id="auth-nickname" style="display: none;">
+                    <label>昵称</label>
+                    <input type="text" id="auth-nickname-input" placeholder="输入昵称">
+                    <div class="field-hint" id="nickname-hint"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="auth-cancel">取消</button>
+                <button class="btn btn-primary" id="auth-submit">登录</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="js/app.js?v=2026042602"></script>
+</body>
+</html>
